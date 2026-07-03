@@ -1,5 +1,5 @@
 // js/admin.js
-const ADMIN_IDS = [984825922]; // ← Сюда ID админов
+const ADMIN_IDS = [984825922,984825922]; // ← Сюда ID админов
 
 // Получаем ID пользователя из Telegram
 const tg = window.Telegram.WebApp;
