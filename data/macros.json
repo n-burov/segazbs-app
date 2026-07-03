@@ -1,0 +1,11 @@
+[
+  {
+    "id": "warrior-charge",
+    "name": "Заряд + Смертельный удар",
+    "class": "warrior",
+    "type": "PvP",
+    "description": "Комбо-макрос для быстрого закрытия дистанции",
+    "content": "#showtooltip Заряд\n/cast Заряд\n/cast Смертельный удар",
+    "screenshot": "https://i.postimg.cc/xxx/macro-charge.jpg"
+  }
+]
