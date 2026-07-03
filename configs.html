@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Конфиги - SegaZBS Helper</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="addons.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <h1>Конфиги</h1>
+            <span id="configsCount">0</span>
+        </header>
+
+        <!-- Предупреждение -->
+        <div class="warning-banner">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Важно!</strong>
+                <p>Конфиги работают только с указанной версией аддона. Проверьте совместимость!</p>
+            </div>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="filters">
+            <div class="filter-group">
+                <select id="addonFilter" class="filter-select">
+                    <option value="all">Все аддоны</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select id="classFilter" class="filter-select">
+                    <option value="all">Все классы</option>
+                    <option value="warrior">Воин</option>
+                    <option value="paladin">Паладин</option>
+                    <option value="deathknight">Рыцарь смерти</option>
+                    <option value="mage">Маг</option>
+                    <option value="priest">Жрец</option>
+                    <option value="rogue">Разбойник</option>
+                    <option value="shaman">Шаман</option>
+                    <option value="hunter">Охотник</option>
+                    <option value="warlock">Чернокнижник</option>
+                    <option value="druid">Друид</option>
+                    <option value="universal">Универсальные</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchConfig" placeholder="🔍 Поиск..." class="search-input">
+            </div>
+        </div>
+
+        <!-- Список конфигов -->
+        <div class="configs-list" id="configsList">
+            <div class="loading">Загрузка...</div>
+        </div>
+
+        <button class="close-btn" onclick="closeApp()">
+            <i class="fas fa-chevron-left"></i> Закрыть
+        </button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let allConfigs = [];
+        let allAddons = [];
+        let selectedAddon = null;
+
+        async function loadData() {
+            try {
+                const [configsRes, addonsRes] = await Promise.all([
+                    fetch('data/configs.json'),
+                    fetch('data/addons.json')
+                ]);
+                allConfigs = await configsRes.json();
+                allAddons = await addonsRes.json();
+
+                // Заполняем фильтр аддонов
+                const addonFilter = document.getElementById('addonFilter');
+                allAddons.forEach(addon => {
+                    const option = document.createElement('option');
+                    option.value = addon.id;
+                    option.textContent = addon.name;
+                    addonFilter.appendChild(option);
+                });
+
+                // Проверяем параметр URL
+                const params = new URLSearchParams(window.location.search);
+                const addonParam = params.get('addon');
+                if (addonParam) {
+                    addonFilter.value = addonParam;
+                    selectedAddon = addonParam;
+                }
+
+                renderConfigs();
+                updateCount();
+            } catch (error) {
+                document.getElementById('configsList').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Не удалось загрузить конфиги</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderConfigs() {
+            const addonFilter = document.getElementById('addonFilter').value;
+            const classFilter = document.getElementById('classFilter').value;
+            const search = document.getElementById('searchConfig').value.toLowerCase();
+
+            let filtered = allConfigs.filter(config => {
+                const matchAddon = addonFilter === 'all' || config.addonId === addonFilter;
+                const matchClass = classFilter === 'all' || config.class === classFilter;
+                const matchSearch = config.name.toLowerCase().includes(search) || 
+                                   (config.description || '').toLowerCase().includes(search);
+                return matchAddon && matchClass && matchSearch;
+            });
+
+            const list = document.getElementById('configsList');
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="empty-state">Конфигов не найдено</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map(config => `
+                <div class="config-card">
+                    <div class="config-header">
+                        <div class="config-info">
+                            <h3>${config.name}</h3>
+                            ${config.addonName ? `<span class="addon-tag">${config.addonName}</span>` : ''}
+                            ${config.class ? `<span class="class-tag ${config.class}">${getClassName(config.class)}</span>` : ''}
+                            ${config.version ? `<span class="version-tag">v${config.version}</span>` : ''}
+                        </div>
+                        <button class="copy-btn" onclick="copyConfig('${config.id}')">
+                            <i class="fas fa-copy"></i> Копировать
+                        </button>
+                    </div>
+                    
+                    ${config.description ? `<p class="config-desc">${config.description}</p>` : ''}
+                    
+                    ${config.screenshot ? `
+                        <div class="config-screenshot">
+                            <img src="${config.screenshot}" alt="${config.name}" loading="lazy">
+                        </div>
+                    ` : ''}
+                    
+                    ${config.warning ? `
+                        <div class="config-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            ${config.warning}
+                        </div>
+                    ` : ''}
+                    
+                    ${config.compatibility ? `
+                        <div class="compatibility-info">
+                            <i class="fas fa-check-circle"></i>
+                            Совместимость: ${config.compatibility}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            updateCount();
+        }
+
+        function getClassName(key) {
+            const classes = {
+                warrior: 'Воин',
+                paladin: 'Паладин',
+                deathknight: 'Рыцарь смерти',
+                mage: 'Маг',
+                priest: 'Жрец',
+                rogue: 'Разбойник',
+                shaman: 'Шаман',
+                hunter: 'Охотник',
+                warlock: 'Чернокнижник',
+                druid: 'Друид',
+                universal: 'Универсальный'
+            };
+            return classes[key] || key;
+        }
+
+        async function copyConfig(configId) {
+            const config = allConfigs.find(c => c.id === configId);
+            if (!config) return;
+
+            try {
+                if (config.content) {
+                    await navigator.clipboard.writeText(config.content);
+                    tg.showPopup({
+                        title: '✅ Готово!',
+                        message: 'Конфиг скопирован в буфер обмена',
+                        buttons: [{ type: 'ok' }]
+                    });
+                } else {
+                    // Если конфиг хранится отдельным файлом
+                    const response = await fetch(`data/configs/${configId}.txt`);
+                    const content = await response.text();
+                    await navigator.clipboard.writeText(content);
+                    tg.showPopup({
+                        title: '✅ Готово!',
+                        message: 'Конфиг скопирован в буфер обмена',
+                        buttons: [{ type: 'ok' }]
+                    });
+                }
+            } catch (err) {
+                tg.showPopup({
+                    title: '❌ Ошибка',
+                    message: 'Не удалось скопировать конфиг',
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+        }
+
+        function updateCount() {
+            const visible = document.querySelectorAll('.config-card').length;
+            document.getElementById('configsCount').textContent = visible;
+        }
+
+        // События фильтров
+        document.getElementById('addonFilter').addEventListener('change', renderConfigs);
+        document.getElementById('classFilter').addEventListener('change', renderConfigs);
+        document.getElementById('searchConfig').addEventListener('input', renderConfigs);
+
+        function closeApp() {
+            tg.close();
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
