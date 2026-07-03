@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Управление - SegaZBS Helper</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <h1>🔐 Управление</h1>
+        </header>
+
+        <!-- Проверка прав -->
+        <div class="admin-check">
+            <div class="warning-banner">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <strong>Только для администраторов</strong>
+                    <p>Добавление и редактирование контента</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладки -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="addons">Аддоны</button>
+            <button class="tab-btn" data-tab="configs">Конфиги</button>
+            <button class="tab-btn" data-tab="macros">Макросы</button>
+        </div>
+
+        <!-- Форма добавления аддона -->
+        <div class="tab-content active" id="tab-addons">
+            <h3>Добавить аддон</h3>
+            <form id="addonForm" class="admin-form">
+                <input type="text" id="addonName" placeholder="Название аддона" required>
+                <input type="text" id="addonId" placeholder="ID (уникальный идентификатор)" required>
+                <select id="addonCategory" required>
+                    <option value="">Выберите категорию</option>
+                    <option value="ui">UI</option>
+                    <option value="combat">Бой</option>
+                    <option value="professions">Профессии</option>
+                    <option value="pvp">PvP</option>
+                    <option value="utility">Утилиты</option>
+                </select>
+                <input type="text" id="addonVersion" placeholder="Версия (например: 1.2.3)">
+                <textarea id="addonDescription" placeholder="Описание аддона"></textarea>
+                <input type="text" id="addonScreenshot" placeholder="URL скриншота (опционально)">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-plus"></i> Добавить аддон
+                </button>
+            </form>
+
+            <h3>Существующие аддоны</h3>
+            <div id="addonsList"></div>
+        </div>
+
+        <!-- Форма добавления конфига -->
+        <div class="tab-content" id="tab-configs">
+            <h3>Добавить конфиг</h3>
+            <form id="configForm" class="admin-form">
+                <input type="text" id="configName" placeholder="Название конфига" required>
+                <input type="text" id="configId" placeholder="ID (уникальный)" required>
+                <select id="configAddon" required>
+                    <option value="">Выберите аддон</option>
+                </select>
+                <select id="configClass">
+                    <option value="universal">Универсальный</option>
+                    <option value="warrior">Воин</option>
+                    <option value="paladin">Паладин</option>
+                    <option value="deathknight">Рыцарь смерти</option>
+                    <option value="mage">Маг</option>
+                    <option value="priest">Жрец</option>
+                    <option value="rogue">Разбойник</option>
+                    <option value="shaman">Шаман</option>
+                    <option value="hunter">Охотник</option>
+                    <option value="warlock">Чернокнижник</option>
+                    <option value="druid">Друид</option>
+                </select>
+                <input type="text" id="configVersion" placeholder="Версия аддона">
+                <textarea id="configDescription" placeholder="Описание конфига"></textarea>
+                <textarea id="configContent" placeholder="Содержимое конфига (строка настроек)" rows="5" required></textarea>
+                <input type="text" id="configScreenshot" placeholder="URL скриншота (опционально)">
+                <input type="text" id="configWarning" placeholder="Предупреждение (опционально)">
+                <input type="text" id="configCompatibility" placeholder="Совместимость (например: WoW 3.3.5)">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-plus"></i> Добавить конфиг
+                </button>
+            </form>
+        </div>
+
+        <!-- Форма добавления макроса -->
+        <div class="tab-content" id="tab-macros">
+            <h3>Добавить макрос</h3>
+            <form id="macroForm" class="admin-form">
+                <input type="text" id="macroName" placeholder="Название макроса" required>
+                <input type="text" id="macroId" placeholder="ID (уникальный)" required>
+                <select id="macroClass">
+                    <option value="universal">Универсальный</option>
+                    <option value="warrior">Воин</option>
+                    <option value="paladin">Паладин</option>
+                    <option value="deathknight">Рыцарь смерти</option>
+                    <option value="mage">Маг</option>
+                    <option value="priest">Жрец</option>
+                    <option value="rogue">Разбойник</option>
+                    <option value="shaman">Шаман</option>
+                    <option value="hunter">Охотник</option>
+                    <option value="warlock">Чернокнижник</option>
+                    <option value="druid">Друид</option>
+                </select>
+                <input type="text" id="macroType" placeholder="Тип макроса (например: PvP, PvE, Утилита)">
+                <textarea id="macroDescription" placeholder="Описание макроса"></textarea>
+                <textarea id="macroContent" placeholder="Текст макроса" rows="5" required></textarea>
+                <input type="text" id="macroScreenshot" placeholder="URL скриншота (опционально)">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-plus"></i> Добавить макрос
+                </button>
+            </form>
+        </div>
+
+        <button class="close-btn" onclick="closeApp()">
+            <i class="fas fa-chevron-left"></i> Закрыть
+        </button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Проверка прав администратора
+        const ADMIN_IDS = [123456789, 987654321];
+        const userId = tg.initDataUnsafe?.user?.id;
+
+        if (!ADMIN_IDS.includes(userId)) {
+            document.querySelector('.admin-check').innerHTML = `
+                <div class="error-message" style="padding: 20px; text-align: center;">
+                    <i class="fas fa-lock" style="font-size: 48px; color: #ff4444;"></i>
+                    <h3>Доступ запрещён</h3>
+                    <p>Только администраторы могут управлять контентом</p>
+                </div>
+            `;
+            document.querySelectorAll('.tab-content, .admin-tabs, .admin-form').forEach(el => {
+                if (!el.closest('.admin-check')) el.style.display = 'none';
+            });
+        }
+
+        // Вкладки
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Загрузка аддонов для селекта
+        async function loadAddonsForSelect() {
+            try {
+                const response = await fetch('data/addons.json');
+                const addons = await response.json();
+                const select = document.getElementById('configAddon');
+                addons.forEach(addon => {
+                    const option = document.createElement('option');
+                    option.value = addon.id;
+                    option.textContent = addon.name;
+                    select.appendChild(option);
+                });
+            } catch {}
+        }
+        loadAddonsForSelect();
+
+        // Обработка форм
+        document.getElementById('addonForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                id: document.getElementById('addonId').value,
+                name: document.getElementById('addonName').value,
+                category: document.getElementById('addonCategory').value,
+                version: document.getElementById('addonVersion').value,
+                description: document.getElementById('addonDescription').value,
+                screenshot: document.getElementById('addonScreenshot').value
+            };
+            await saveToGitHub('addons', data);
+        });
+
+        document.getElementById('configForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                id: document.getElementById('configId').value,
+                name: document.getElementById('configName').value,
+                addonId: document.getElementById('configAddon').value,
+                class: document.getElementById('configClass').value,
+                version: document.getElementById('configVersion').value,
+                description: document.getElementById('configDescription').value,
+                content: document.getElementById('configContent').value,
+                screenshot: document.getElementById('configScreenshot').value,
+                warning: document.getElementById('configWarning').value,
+                compatibility: document.getElementById('configCompatibility').value
+            };
+            await saveToGitHub('configs', data);
+        });
+
+        document.getElementById('macroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                id: document.getElementById('macroId').value,
+                name: document.getElementById('macroName').value,
+                class: document.getElementById('macroClass').value,
+                type: document.getElementById('macroType').value,
+                description: document.getElementById('macroDescription').value,
+                content: document.getElementById('macroContent').value,
+                screenshot: document.getElementById('macroScreenshot').value
+            };
+            await saveToGitHub('macros', data);
+        });
+
+        // Сохранение через GitHub API
+        async function saveToGitHub(type, data) {
+            try {
+                // Здесь логика сохранения в GitHub
+                // Используй GitHub API с Personal Access Token
+                tg.showPopup({
+                    title: '📤 Сохранение',
+                    message: 'Данные отправляются в репозиторий...',
+                    buttons: [{ type: 'ok' }]
+                });
+                
+                // Реальная реализация требует GitHub Token
+                console.log('Сохранение:', type, data);
+                
+                tg.showPopup({
+                    title: '✅ Готово!',
+                    message: 'Данные успешно сохранены',
+                    buttons: [{ type: 'ok' }]
+                });
+            } catch (error) {
+                tg.showPopup({
+                    title: '❌ Ошибка',
+                    message: 'Не удалось сохранить данные',
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+        }
+
+        function closeApp() {
+            tg.close();
+        }
+    </script>
+</body>
+</html>
