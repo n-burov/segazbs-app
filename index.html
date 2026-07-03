@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SegaZBS Helper</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container" id="mainContent">
+        <header class="app-header">
+            <img src="https://i.postimg.cc/RFNNQ4RP/71a2c23b-f462-482a-8e89-f0c4336d3d98.jpg" alt="SegaZBS" class="avatar" id="logo">
+            <div>
+                <h1>SegaZBS Helper</h1>
+                <p>База знаний для WoW</p>
+            </div>
+        </header>
+
+        <div class="main-menu">
+            <div class="menu-grid">
+                <a href="addons.html" class="menu-card">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <span>Аддоны</span>
+                    <small>Список всех аддонов</small>
+                </a>
+                <a href="configs.html" class="menu-card">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Конфиги</span>
+                    <small>Настройки для аддонов</small>
+                </a>
+                <a href="macros.html" class="menu-card">
+                    <i class="fas fa-terminal"></i>
+                    <span>Макросы</span>
+                    <small>Готовые макросы</small>
+                </a>
+            </div>
+
+            <div class="quick-info">
+                <div class="info-badge">
+                    <i class="fas fa-database"></i>
+                    <span id="totalItems">Загрузка...</span>
+                </div>
+                <div class="info-badge">
+                    <i class="fas fa-users"></i>
+                    <span>@segazbs</span>
+                </div>
+            </div>
+
+            <!-- 👇 АДМИН-КНОПКА (по умолчанию скрыта) -->
+            <button id="adminBtn" class="admin-btn" style="display:none;" onclick="openAdmin()">
+                <i class="fas fa-crown"></i> Управление контентом
+            </button>
+        </div>
+
+        <!-- Социальные сети -->
+        <div class="social-bar">
+            <a href="https://t.me/segazbs" target="_blank"><i class="fab fa-telegram"></i></a>
+            <a href="https://twitch.tv/segazbs" target="_blank"><i class="fab fa-twitch"></i></a>
+            <a href="https://youtube.com/segazbs" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://discord.gg/segazbs" target="_blank"><i class="fab fa-discord"></i></a>
+        </div>
+
+        <button class="close-btn" onclick="closeApp()">
+            <i class="fas fa-chevron-left"></i> Закрыть
+        </button>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 👇 АДМИН-ПАНЕЛЬ (по умолчанию скрыта) -->
+    <!-- ============================================ -->
+    <div id="adminPanel" style="display:none; padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2><i class="fas fa-crown" style="color:#ffcc00;"></i> Админ-панель</h2>
+            <button onclick="closeAdmin()" style="background:transparent; border:none; color:#fff; font-size:20px; cursor:pointer;">✕</button>
+        </div>
+
+        <!-- Статистика -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px;">
+            <div style="background:#2a2a2a; padding:15px; border-radius:10px; text-align:center;">
+                <div style="font-size:24px; color:#cc3700;" id="adminAddonsCount">0</div>
+                <div style="font-size:12px; color:#888;">Аддонов</div>
+            </div>
+            <div style="background:#2a2a2a; padding:15px; border-radius:10px; text-align:center;">
+                <div style="font-size:24px; color:#cc3700;" id="adminConfigsCount">0</div>
+                <div style="font-size:12px; color:#888;">Конфигов</div>
+            </div>
+            <div style="background:#2a2a2a; padding:15px; border-radius:10px; text-align:center;">
+                <div style="font-size:24px; color:#cc3700;" id="adminMacrosCount">0</div>
+                <div style="font-size:12px; color:#888;">Макросов</div>
+            </div>
+        </div>
+
+        <!-- Кнопки управления -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <a href="admin.html" style="display:block; padding:14px; background:#cc3700; color:#fff; text-align:center; border-radius:10px; text-decoration:none; font-weight:600;">
+                <i class="fas fa-plus"></i> Добавить аддон
+            </a>
+            <a href="admin.html?tab=configs" style="display:block; padding:14px; background:#2a2a2a; color:#fff; text-align:center; border-radius:10px; text-decoration:none; font-weight:600;">
+                <i class="fas fa-plus"></i> Добавить конфиг
+            </a>
+            <a href="admin.html?tab=macros" style="display:block; padding:14px; background:#2a2a2a; color:#fff; text-align:center; border-radius:10px; text-decoration:none; font-weight:600;">
+                <i class="fas fa-plus"></i> Добавить макрос
+            </a>
+            <button onclick="sendPostToChannel()" style="padding:14px; background:#0055cc; color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer;">
+                <i class="fas fa-bullhorn"></i> Отправить пост в канал
+            </button>
+            <button onclick="unpinAll()" style="padding:14px; background:#555; color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer;">
+                <i class="fas fa-unpin"></i> Открепить всё
+            </button>
+        </div>
+
+        <!-- Инструкция -->
+        <div style="margin-top:20px; padding:12px; background:#1a1a1a; border-radius:8px; font-size:12px; color:#666;">
+            <strong style="color:#888;">🔐 Как попасть в админку:</strong><br>
+            • Кнопка появляется автоматически для админов<br>
+            • Или 5 быстрых тапов по аватарке<br>
+            • Или 3 свайпа вниз
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // ============================================
+        // ID АДМИНИСТРАТОРОВ (измени под себя!)
+        // ============================================
+        const ADMIN_IDS = [123456789, 987654321]; // ← СЮДА СВОЙ ID
+
+        const userId = tg.initDataUnsafe?.user?.id;
+
+        function isAdmin() {
+            return ADMIN_IDS.includes(userId);
+        }
+
+        // Показать админ-кнопку
+        function showAdminButton() {
+            const btn = document.getElementById('adminBtn');
+            if (btn && isAdmin()) {
+                btn.style.display = 'flex';
+            }
+        }
+
+        // Открыть админку
+        function openAdmin() {
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadAdminData();
+        }
+
+        // Закрыть админку
+        function closeAdmin() {
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        // Загрузить статистику
+        async function loadAdminData() {
+            try {
+                const [addons, configs, macros] = await Promise.all([
+                    fetch('data/addons.json').then(r => r.json()),
+                    fetch('data/configs.json').then(r => r.json()),
+                    fetch('data/macros.json').then(r => r.json())
+                ]);
+                document.getElementById('adminAddonsCount').textContent = addons.length;
+                document.getElementById('adminConfigsCount').textContent = configs.length;
+                document.getElementById('adminMacrosCount').textContent = macros.length;
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
+            }
+        }
+
+        // Отправить пост в канал (вызов API)
+        async function sendPostToChannel() {
+            tg.showPopup({
+                title: '📌 Отправка поста',
+                message: 'Отправить закрепленный пост в канал?',
+                buttons: [
+                    { id: 'cancel', type: 'cancel' },
+                    { id: 'send', type: 'default', text: '✅ Отправить' }
+                ]
+            }, async (btnId) => {
+                if (btnId === 'send') {
+                    try {
+                        const res = await fetch('/api/sendPost', { method: 'POST' });
+                        const data = await res.json();
+                        tg.showPopup({
+                            title: data.success ? '✅ Готово!' : '❌ Ошибка',
+                            message: data.message || data.error || 'Неизвестная ошибка',
+                            buttons: [{ type: 'ok' }]
+                        });
+                    } catch (e) {
+                        tg.showPopup({
+                            title: '❌ Ошибка',
+                            message: 'Не удалось отправить пост',
+                            buttons: [{ type: 'ok' }]
+                        });
+                    }
+                }
+            });
+        }
+
+        // Открепить всё
+        async function unpinAll() {
+            tg.showPopup({
+                title: '📌 Открепление',
+                message: 'Открепить все сообщения в канале?',
+                buttons: [
+                    { id: 'cancel', type: 'cancel' },
+                    { id: 'unpin', type: 'default', text: '✅ Открепить' }
+                ]
+            }, async (btnId) => {
+                if (btnId === 'unpin') {
+                    try {
+                        const res = await fetch('/api/unpinAll', { method: 'POST' });
+                        const data = await res.json();
+                        tg.showPopup({
+                            title: data.success ? '✅ Готово!' : '❌ Ошибка',
+                            message: data.message || data.error,
+                            buttons: [{ type: 'ok' }]
+                        });
+                    } catch (e) {
+                        tg.showPopup({
+                            title: '❌ Ошибка',
+                            message: 'Не удалось открепить',
+                            buttons: [{ type: 'ok' }]
+                        });
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // СКРЫТЫЙ ВХОД: 5 тапов по аватарке
+        // ============================================
+        let tapCount = 0;
+        let tapTimer = null;
+
+        document.getElementById('logo')?.addEventListener('click', () => {
+            tapCount++;
+            clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
+
+            if (tapCount >= 5) {
+                tapCount = 0;
+                if (isAdmin()) {
+                    openAdmin();
+                } else {
+                    tg.showPopup({
+                        title: '⛔ Доступ запрещён',
+                        message: 'Только администраторы могут войти в панель управления.',
+                        buttons: [{ type: 'ok' }]
+                    });
+                }
+            }
+        });
+
+        // ============================================
+        // СКРЫТЫЙ ВХОД: 3 свайпа вниз
+        // ============================================
+        let swipeCount = 0;
+        let lastSwipeTime = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            const startY = e.touches[0].clientY;
+            const touchEnd = (ev) => {
+                const endY = ev.changedTouches[0].clientY;
+                const diff = startY - endY;
+                if (diff > 50) {
+                    const now = Date.now();
+                    if (now - lastSwipeTime < 3000) {
+                        swipeCount++;
+                    } else {
+                        swipeCount = 1;
+                    }
+                    lastSwipeTime = now;
+
+                    if (swipeCount >= 3) {
+                        swipeCount = 0;
+                        if (isAdmin()) {
+                            openAdmin();
+                        } else {
+                            tg.showPopup({
+                                title: '⛔ Доступ запрещён',
+                                message: 'Только администраторы могут войти в панель управления.',
+                                buttons: [{ type: 'ok' }]
+                            });
+                        }
+                    }
+                }
+                document.removeEventListener('touchend', touchEnd);
+            };
+            document.addEventListener('touchend', touchEnd);
+        });
+
+        // ============================================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ============================================
+        showAdminButton();
+
+        // Подсчёт элементов на главной
+        async function loadStats() {
+            try {
+                const [addons, configs, macros] = await Promise.all([
+                    fetch('data/addons.json').then(r => r.json()),
+                    fetch('data/configs.json').then(r => r.json()),
+                    fetch('data/macros.json').then(r => r.json())
+                ]);
+                const total = addons.length + configs.length + macros.length;
+                document.getElementById('totalItems').textContent = `${total} элементов`;
+            } catch {
+                document.getElementById('totalItems').textContent = 'Данные загружены';
+            }
+        }
+        loadStats();
+
+        function closeApp() {
+            tg.close();
+        }
+
+        // Экспорт функций
+        window.openAdmin = openAdmin;
+        window.closeAdmin = closeAdmin;
+        window.sendPostToChannel = sendPostToChannel;
+        window.unpinAll = unpinAll;
+    </script>
+</body>
+</html>
