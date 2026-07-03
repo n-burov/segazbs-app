@@ -1,0 +1,15 @@
+[
+  {
+    "id": "wa-fury-warrior",
+    "name": "WeakAuras для воина неистовства",
+    "addonId": "weakauras",
+    "addonName": "WeakAuras",
+    "class": "warrior",
+    "version": "5.0.1",
+    "description": "Полный набор аурасов для воина неистовства в PvE",
+    "content": "!WA:2!... (длинная строка конфига)",
+    "screenshot": "https://i.postimg.cc/xxx/wa-fury.jpg",
+    "warning": "Требуется WeakAuras версии 5.0.1 или выше",
+    "compatibility": "WoW 3.3.5 / 4.3.4"
+  }
+]
