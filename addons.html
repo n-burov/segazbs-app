@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Аддоны - SegaZBS Helper</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <h1>Аддоны</h1>
+            <span id="addonsCount">0</span>
+        </header>
+
+        <!-- Фильтры -->
+        <div class="filters">
+            <div class="filter-group">
+                <input type="text" id="searchAddon" placeholder="🔍 Поиск аддона..." class="search-input">
+            </div>
+            <div class="filter-group">
+                <select id="categoryFilter" class="filter-select">
+                    <option value="all">Все категории</option>
+                    <option value="ui">UI</option>
+                    <option value="combat">Бой</option>
+                    <option value="professions">Профессии</option>
+                    <option value="pvp">PvP</option>
+                    <option value="utility">Утилиты</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Список аддонов -->
+        <div class="addons-grid" id="addonsGrid">
+            <div class="loading">Загрузка...</div>
+        </div>
+
+        <button class="close-btn" onclick="closeApp()">
+            <i class="fas fa-chevron-left"></i> Закрыть
+        </button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let allAddons = [];
+
+        async function loadAddons() {
+            try {
+                const response = await fetch('data/addons.json');
+                allAddons = await response.json();
+                renderAddons(allAddons);
+                document.getElementById('addonsCount').textContent = allAddons.length;
+            } catch (error) {
+                document.getElementById('addonsGrid').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Не удалось загрузить аддоны</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderAddons(addons) {
+            const grid = document.getElementById('addonsGrid');
+            if (addons.length === 0) {
+                grid.innerHTML = `<div class="empty-state">Нет аддонов в этой категории</div>`;
+                return;
+            }
+
+            grid.innerHTML = addons.map(addon => `
+                <div class="addon-card" onclick="openAddon('${addon.id}')">
+                    <div class="addon-preview">
+                        ${addon.screenshot ? 
+                            `<img src="${addon.screenshot}" alt="${addon.name}" loading="lazy">` :
+                            `<div class="no-image"><i class="fas fa-puzzle-piece"></i></div>`
+                        }
+                    </div>
+                    <div class="addon-info">
+                        <h3>${addon.name}</h3>
+                        <p>${addon.description || ''}</p>
+                        <div class="addon-meta">
+                            <span class="tag">${addon.category || 'Общее'}</span>
+                            ${addon.version ? `<span class="version">v${addon.version}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddon(addonId) {
+            window.location.href = `configs.html?addon=${addonId}`;
+        }
+
+        // Фильтрация
+        document.getElementById('searchAddon').addEventListener('input', filterAddons);
+        document.getElementById('categoryFilter').addEventListener('change', filterAddons);
+
+        function filterAddons() {
+            const search = document.getElementById('searchAddon').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            let filtered = allAddons.filter(addon => {
+                const matchSearch = addon.name.toLowerCase().includes(search) || 
+                                   (addon.description || '').toLowerCase().includes(search);
+                const matchCategory = category === 'all' || addon.category === category;
+                return matchSearch && matchCategory;
+            });
+
+            renderAddons(filtered);
+        }
+
+        function closeApp() {
+            tg.close();
+        }
+
+        loadAddons();
+    </script>
+</body>
+</html>
