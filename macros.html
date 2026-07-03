@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Макросы - SegaZBS Helper</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <h1>Макросы</h1>
+            <span id="macrosCount">0</span>
+        </header>
+
+        <!-- Фильтры -->
+        <div class="filters">
+            <div class="filter-group">
+                <select id="classFilter" class="filter-select">
+                    <option value="all">Все классы</option>
+                    <option value="warrior">Воин</option>
+                    <option value="paladin">Паладин</option>
+                    <option value="deathknight">Рыцарь смерти</option>
+                    <option value="mage">Маг</option>
+                    <option value="priest">Жрец</option>
+                    <option value="rogue">Разбойник</option>
+                    <option value="shaman">Шаман</option>
+                    <option value="hunter">Охотник</option>
+                    <option value="warlock">Чернокнижник</option>
+                    <option value="druid">Друид</option>
+                    <option value="universal">Универсальные</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchMacro" placeholder="🔍 Поиск макроса..." class="search-input">
+            </div>
+        </div>
+
+        <!-- Список макросов -->
+        <div class="macros-list" id="macrosList">
+            <div class="loading">Загрузка...</div>
+        </div>
+
+        <button class="close-btn" onclick="closeApp()">
+            <i class="fas fa-chevron-left"></i> Закрыть
+        </button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let allMacros = [];
+
+        async function loadMacros() {
+            try {
+                const response = await fetch('data/macros.json');
+                allMacros = await response.json();
+                renderMacros(allMacros);
+                document.getElementById('macrosCount').textContent = allMacros.length;
+            } catch (error) {
+                document.getElementById('macrosList').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Не удалось загрузить макросы</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderMacros(macros) {
+            const list = document.getElementById('macrosList');
+            if (macros.length === 0) {
+                list.innerHTML = `<div class="empty-state">Макросов не найдено</div>`;
+                return;
+            }
+
+            list.innerHTML = macros.map(macro => `
+                <div class="macro-card">
+                    <div class="macro-header">
+                        <div class="macro-info">
+                            <h3>${macro.name}</h3>
+                            ${macro.class ? `<span class="class-tag ${macro.class}">${getClassName(macro.class)}</span>` : ''}
+                            ${macro.type ? `<span class="type-tag">${macro.type}</span>` : ''}
+                        </div>
+                        <button class="copy-btn" onclick="copyMacro('${macro.id}')">
+                            <i class="fas fa-copy"></i> Копировать
+                        </button>
+                    </div>
+                    
+                    ${macro.description ? `<p class="macro-desc">${macro.description}</p>` : ''}
+                    
+                    ${macro.screenshot ? `
+                        <div class="macro-screenshot">
+                            <img src="${macro.screenshot}" alt="${macro.name}" loading="lazy">
+                        </div>
+                    ` : ''}
+                    
+                    <div class="macro-code" onclick="copyMacro('${macro.id}')">
+                        <pre><code>${macro.content || ''}</code></pre>
+                        <div class="code-overlay">
+                            <i class="fas fa-copy"></i> Нажмите для копирования
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getClassName(key) {
+            const classes = {
+                warrior: 'Воин',
+                paladin: 'Паладин',
+                deathknight: 'Рыцарь смерти',
+                mage: 'Маг',
+                priest: 'Жрец',
+                rogue: 'Разбойник',
+                shaman: 'Шаман',
+                hunter: 'Охотник',
+                warlock: 'Чернокнижник',
+                druid: 'Друид',
+                universal: 'Универсальный'
+            };
+            return classes[key] || key;
+        }
+
+        async function copyMacro(macroId) {
+            const macro = allMacros.find(m => m.id === macroId);
+            if (!macro || !macro.content) return;
+
+            try {
+                await navigator.clipboard.writeText(macro.content);
+                tg.showPopup({
+                    title: '✅ Готово!',
+                    message: 'Макрос скопирован в буфер обмена',
+                    buttons: [{ type: 'ok' }]
+                });
+            } catch (err) {
+                tg.showPopup({
+                    title: '❌ Ошибка',
+                    message: 'Не удалось скопировать макрос',
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+        }
+
+        // Фильтрация
+        document.getElementById('classFilter').addEventListener('change', filterMacros);
+        document.getElementById('searchMacro').addEventListener('input', filterMacros);
+
+        function filterMacros() {
+            const classFilter = document.getElementById('classFilter').value;
+            const search = document.getElementById('searchMacro').value.toLowerCase();
+
+            let filtered = allMacros.filter(macro => {
+                const matchClass = classFilter === 'all' || macro.class === classFilter;
+                const matchSearch = macro.name.toLowerCase().includes(search) || 
+                                   (macro.description || '').toLowerCase().includes(search);
+                return matchClass && matchSearch;
+            });
+
+            renderMacros(filtered);
+            document.getElementById('macrosCount').textContent = filtered.length;
+        }
+
+        function closeApp() {
+            tg.close();
+        }
+
+        loadMacros();
+    </script>
+</body>
+</html>
