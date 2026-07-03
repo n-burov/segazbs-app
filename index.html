@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SegaZBS Helper</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-container" id="mainContent">
+
+    <!-- ========== HEADER ========== -->
+    <header class="app-header">
+        <img src="https://i.postimg.cc/RFNNQ4RP/71a2c23b-f462-482a-8e89-f0c4336d3d98.jpg" alt="SegaZBS" class="avatar" id="logo">
+        <div class="header-content">
+            <h1>SegaZBS Helper</h1>
+            <p>База знаний для World of Warcraft</p>
+        </div>
+    </header>
+
+    <!-- ========== USER ID ========== -->
+    <div class="user-id-display">
+        👤 ID: <span class="id-value" id="userIdText">загрузка...</span>
+        <span id="adminStatusText" style="margin-left:8px;"></span>
+    </div>
+
+    <!-- ========== MENU ========== -->
+    <div class="menu-grid">
+        <a href="addons.html" class="menu-card">
+            <i class="fas fa-puzzle-piece"></i>
+            <span>Аддоны</span>
+            <small>Список всех аддонов</small>
+        </a>
+        <a href="configs.html" class="menu-card">
+            <i class="fas fa-sliders-h"></i>
+            <span>Конфиги</span>
+            <small>Настройки для аддонов</small>
+        </a>
+        <a href="macros.html" class="menu-card">
+            <i class="fas fa-terminal"></i>
+            <span>Макросы</span>
+            <small>Готовые макросы</small>
+        </a>
+    </div>
+
+    <!-- ========== QUICK INFO ========== -->
+    <div class="quick-info">
+        <div class="info-badge">
+            <i class="fas fa-database"></i>
+            <span id="totalItems">Загрузка...</span>
+        </div>
+        <div class="info-badge">
+            <i class="fas fa-users"></i>
+            <span>@segazbs</span>
+        </div>
+    </div>
+
+    <!-- ========== ADMIN BUTTON ========== -->
+    <button id="adminBtn" class="admin-btn" onclick="openAdmin()">
+        <i class="fas fa-crown"></i>
+        Управление контентом
+        <span class="lock-icon">🔐</span>
+    </button>
+
+    <!-- ========== SOCIAL BAR ========== -->
+    <div class="social-bar">
+        <a href="https://t.me/segazbs" target="_blank" class="telegram"><i class="fab fa-telegram"></i></a>
+        <a href="https://twitch.tv/segazbs" target="_blank" class="twitch"><i class="fab fa-twitch"></i></a>
+        <a href="https://youtube.com/segazbs" target="_blank" class="youtube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.gg/segazbs" target="_blank" class="discord"><i class="fab fa-discord"></i></a>
+    </div>
+
+    <!-- ========== CLOSE BUTTON ========== -->
+    <button class="close-btn" onclick="closeApp()">
+        <i class="fas fa-chevron-left"></i> Закрыть
+    </button>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- ========== АДМИН-ПАНЕЛЬ ========== -->
+<!-- ============================================================ -->
+<div id="adminPanel">
+
+    <div class="admin-header">
+        <h2><i class="fas fa-crown"></i> Админ-панель</h2>
+        <button class="admin-close-btn" onclick="closeAdmin()">✕</button>
+    </div>
+
+    <!-- Статистика -->
+    <div class="admin-stats">
+        <div class="admin-stat-card">
+            <div class="number" id="adminAddonsCount">0</div>
+            <div class="label">Аддонов</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="number" id="adminConfigsCount">0</div>
+            <div class="label">Конфигов</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="number" id="adminMacrosCount">0</div>
+            <div class="label">Макросов</div>
+        </div>
+    </div>
+
+    <!-- Действия -->
+    <div class="admin-actions">
+        <a href="admin.html" class="action-btn primary">
+            <i class="fas fa-plus"></i> Добавить аддон
+        </a>
+        <a href="admin.html?tab=configs" class="action-btn secondary">
+            <i class="fas fa-plus"></i> Добавить конфиг
+        </a>
+        <a href="admin.html?tab=macros" class="action-btn secondary">
+            <i class="fas fa-plus"></i> Добавить макрос
+        </a>
+        <button class="action-btn blue" onclick="sendPostToChannel()">
+            <i class="fas fa-bullhorn"></i> Отправить пост в канал
+        </button>
+        <button class="action-btn gray" onclick="unpinAll()">
+            <i class="fas fa-unpin"></i> Открепить всё
+        </button>
+    </div>
+
+    <!-- Подсказка -->
+    <div class="admin-hint">
+        <strong>🔐 Как попасть в админку:</strong><br>
+        • Кнопка <span class="highlight">«Управление контентом»</span> появляется автоматически, если ты админ<br>
+        • Или <span class="highlight">5 быстрых тапов</span> по аватарке<br>
+        • Твой ID: <span id="adminUserIdDisplay">загрузка...</span>
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- ========== СКРИПТЫ ========== -->
+<!-- ============================================================ -->
+<script>
+    // ============================================
+    // ИНИЦИАЛИЗАЦИЯ TELEGRAM
+    // ============================================
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // ============================================
+    // ID АДМИНИСТРАТОРОВ
+    // ============================================
+    const ADMIN_IDS = [984825922];
+
+    // ============================================
+    // ПОЛУЧЕНИЕ ID
+    // ============================================
+    let userId = null;
+
+    try {
+        userId = tg.initDataUnsafe?.user?.id || null;
+        if (!userId) {
+            const saved = localStorage.getItem('adminUserId');
+            if (saved) userId = parseInt(saved);
+        }
+    } catch (e) {
+        console.warn('Ошибка получения ID:', e);
+    }
+
+    // ============================================
+    // ФУНКЦИИ
+    // ============================================
+    function isAdmin() {
+        if (!userId) return false;
+        return ADMIN_IDS.includes(userId);
+    }
+
+    function displayUserId() {
+        const el = document.getElementById('userIdText');
+        const statusEl = document.getElementById('adminStatusText');
+        const adminIdEl = document.getElementById('adminUserIdDisplay');
+
+        if (!el) return;
+
+        if (userId) {
+            el.textContent = userId;
+            el.className = 'id-value' + (isAdmin() ? ' admin' : ' user');
+
+            if (isAdmin()) {
+                statusEl.textContent = '✅ Админ';
+                statusEl.style.color = '#66ff66';
+            } else {
+                statusEl.textContent = '👤 Пользователь';
+                statusEl.style.color = '#ffcc00';
+            }
+
+            if (adminIdEl) {
+                adminIdEl.textContent = userId + (isAdmin() ? ' ✅' : '');
+                adminIdEl.style.color = isAdmin() ? '#66ff66' : '#ffcc00';
+            }
+        } else {
+            el.textContent = 'не определён';
+            el.className = 'id-value unknown';
+            statusEl.textContent = '⚠️';
+            statusEl.style.color = '#ff4444';
+            if (adminIdEl) {
+                adminIdEl.textContent = 'не определён';
+                adminIdEl.style.color = '#ff4444';
+            }
+        }
+    }
+
+    function showAdminButton() {
+        const btn = document.getElementById('adminBtn');
+        if (!btn) return;
+
+        if (isAdmin()) {
+            btn.style.display = 'flex';
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    function openAdmin() {
+        if (!isAdmin()) {
+            tg.showPopup({
+                title: '⛔ Доступ запрещён',
+                message: `Ваш ID: ${userId || 'не определён'}\nНужный ID: ${ADMIN_IDS.join(', ')}`,
+                buttons: [{ type: 'ok' }]
+            });
+            return;
+        }
+
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadAdminData();
+    }
+
+    function closeAdmin() {
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    async function loadAdminData() {
+        try {
+            const [addons, configs, macros] = await Promise.all([
+                fetch('data/addons.json').then(r => r.json()),
+                fetch('data/configs.json').then(r => r.json()),
+                fetch('data/macros.json').then(r => r.json())
+            ]);
+
+            document.getElementById('adminAddonsCount').textContent = addons.length;
+            document.getElementById('adminConfigsCount').textContent = configs.length;
+            document.getElementById('adminMacrosCount').textContent = macros.length;
+        } catch (e) {
+            console.error('Ошибка загрузки:', e);
+        }
+    }
+
+    async function sendPostToChannel() {
+        tg.showPopup({
+            title: '📌 Отправка поста',
+            message: 'Отправить закрепленный пост в канал?',
+            buttons: [
+                { id: 'cancel', type: 'cancel' },
+                { id: 'send', type: 'default', text: '✅ Отправить' }
+            ]
+        }, async (btnId) => {
+            if (btnId === 'send') {
+                try {
+                    const res = await fetch('/api/sendPost', { method: 'POST' });
+                    const data = await res.json();
+                    tg.showPopup({
+                        title: data.success ? '✅ Готово!' : '❌ Ошибка',
+                        message: data.message || data.error || 'Неизвестная ошибка',
+                        buttons: [{ type: 'ok' }]
+                    });
+                } catch (e) {
+                    tg.showPopup({
+                        title: '❌ Ошибка',
+                        message: 'Не удалось отправить пост',
+                        buttons: [{ type: 'ok' }]
+                    });
+                }
+            }
+        });
+    }
+
+    async function unpinAll() {
+        tg.showPopup({
+            title: '📌 Открепление',
+            message: 'Открепить все сообщения в канале?',
+            buttons: [
+                { id: 'cancel', type: 'cancel' },
+                { id: 'unpin', type: 'default', text: '✅ Открепить' }
+            ]
+        }, async (btnId) => {
+            if (btnId === 'unpin') {
+                try {
+                    const res = await fetch('/api/unpinAll', { method: 'POST' });
+                    const data = await res.json();
+                    tg.showPopup({
+                        title: data.success ? '✅ Готово!' : '❌ Ошибка',
+                        message: data.message || data.error,
+                        buttons: [{ type: 'ok' }]
+                    });
+                } catch (e) {
+                    tg.showPopup({
+                        title: '❌ Ошибка',
+                        message: 'Не удалось открепить',
+                        buttons: [{ type: 'ok' }]
+                    });
+                }
+            }
+        });
+    }
+
+    function closeApp() {
+        tg.close();
+    }
+
+    // ============================================
+    // 5 ТАПОВ ПО АВАТАРКЕ
+    // ============================================
+    let tapCount = 0;
+    let tapTimer = null;
+
+    document.getElementById('logo')?.addEventListener('click', () => {
+        tapCount++;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
+
+        if (tapCount >= 5) {
+            tapCount = 0;
+            if (isAdmin()) {
+                openAdmin();
+            } else {
+                tg.showPopup({
+                    title: '⛔ Доступ запрещён',
+                    message: `Только администраторы могут войти в панель управления.\nВаш ID: ${userId || 'не определён'}`,
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+        }
+    });
+
+    // ============================================
+    // ЗАПРОС ID ЕСЛИ НЕ ОПРЕДЕЛЁН
+    // ============================================
+    if (!userId) {
+        setTimeout(() => {
+            tg.showPopup({
+                title: '🔐 Вход в приложение',
+                message: 'Введите ваш Telegram ID для доступа к админ-панели.\n\nID можно узнать у @userinfobot',
+                buttons: [
+                    { id: 'cancel', type: 'cancel', text: 'Пропустить' },
+                    { id: 'enter', type: 'default', text: '📝 Ввести ID' }
+                ]
+            }, (btnId) => {
+                if (btnId === 'enter') {
+                    const input = prompt('Введите ваш Telegram ID (число):');
+                    if (input && !isNaN(input) && input.trim() !== '') {
+                        const parsed = parseInt(input.trim());
+                        localStorage.setItem('adminUserId', parsed);
+                        location.reload();
+                    }
+                }
+            });
+        }, 800);
+    }
+
+    // ============================================
+    // ЗАГРУЗКА СТАТИСТИКИ
+    // ============================================
+    async function loadStats() {
+        try {
+            const [addons, configs, macros] = await Promise.all([
+                fetch('data/addons.json').then(r => r.json()),
+                fetch('data/configs.json').then(r => r.json()),
+                fetch('data/macros.json').then(r => r.json())
+            ]);
+            const total = addons.length + configs.length + macros.length;
+            document.getElementById('totalItems').textContent = `${total} элементов`;
+        } catch {
+            document.getElementById('totalItems').textContent = 'Данные загружены';
+        }
+    }
+
+    // ============================================
+    // ИНИЦИАЛИЗАЦИЯ
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        displayUserId();
+        showAdminButton();
+        loadStats();
+    });
+
+    // Экспорт в глобальный скоуп
+    window.openAdmin = openAdmin;
+    window.closeAdmin = closeAdmin;
+    window.sendPostToChannel = sendPostToChannel;
+    window.unpinAll = unpinAll;
+    window.closeApp = closeApp;
+</script>
+
+</body>
+</html>
