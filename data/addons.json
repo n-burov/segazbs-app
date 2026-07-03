@@ -1,0 +1,18 @@
+[
+  {
+    "id": "weakauras",
+    "name": "WeakAuras",
+    "category": "ui",
+    "version": "5.0.1",
+    "description": "Мощный аддон для создания индикаторов и аурасов",
+    "screenshot": "https://i.postimg.cc/xxx/weakauras-preview.jpg"
+  },
+  {
+    "id": "deadlybossmods",
+    "name": "Deadly Boss Mods",
+    "category": "combat",
+    "version": "9.1.5",
+    "description": "Аддон для боссов в рейдах и подземельях",
+    "screenshot": "https://i.postimg.cc/xxx/dbm-preview.jpg"
+  }
+]
