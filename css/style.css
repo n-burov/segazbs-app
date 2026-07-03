@@ -1,0 +1,644 @@
+/* Telegram Mini App Styles */
+:root {
+    --bg-color: #1a1a1a;
+    --card-bg: #2a2a2a;
+    --text-color: #ffffff;
+    --accent: #cc3700;
+    --accent-hover: #e04400;
+    --border: #3a3a3a;
+    --shadow: 0 4px 15px rgba(0,0,0,0.3);
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+}
+
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-top: env(safe-area-inset-top, 12px);
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+}
+
+.app-header .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+}
+
+.app-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    flex: 1;
+}
+
+.app-header .back-btn {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 20px;
+    padding: 4px 8px;
+}
+
+.app-header span {
+    background: var(--accent);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Menu */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.menu-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 12px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text-color);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.menu-card:active {
+    transform: scale(0.96);
+}
+
+.menu-card i {
+    font-size: 2.2em;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.menu-card span {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.menu-card small {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* Quick Info */
+.quick-info {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.info-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.info-badge i {
+    color: var(--accent);
+}
+
+/* Social Bar */
+.social-bar {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    padding: 16px 0;
+}
+
+.social-bar a {
+    color: var(--text-color);
+    font-size: 24px;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.social-bar a:active {
+    opacity: 1;
+}
+
+/* Filters */
+.filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.filter-group {
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: var(--accent);
+}
+
+.filter-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-color);
+    font-size: 14px;
+    appearance: none;
+    outline: none;
+}
+
+.filter-select:focus {
+    border-color: var(--accent);
+}
+
+/* Warning Banner */
+.warning-banner {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 200, 0, 0.1);
+    border: 1px solid rgba(255, 200, 0, 0.3);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+}
+
+.warning-banner i {
+    color: #ffcc00;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.warning-banner strong {
+    display: block;
+    color: #ffcc00;
+}
+
+.warning-banner p {
+    font-size: 13px;
+    color: #aaa;
+    margin: 0;
+}
+
+/* Cards */
+.addon-card {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.addon-card:active {
+    transform: scale(0.98);
+}
+
+.addon-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #333;
+}
+
+.addon-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #666;
+    font-size: 24px;
+}
+
+.addon-info {
+    flex: 1;
+}
+
+.addon-info h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.addon-info p {
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 6px;
+}
+
+.addon-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--accent);
+    border-radius: 12px;
+}
+
+.version {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: #444;
+    border-radius: 12px;
+}
+
+/* Config Cards */
+.config-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.config-info h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.config-desc {
+    font-size: 13px;
+    color: #aaa;
+    margin: 8px 0 12px;
+}
+
+.addon-tag, .class-tag, .version-tag, .type-tag {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+}
+
+.addon-tag {
+    background: #2a4a7f;
+}
+
+.class-tag {
+    background: #5a3a2a;
+}
+
+.class-tag.warrior { background: #8a5a3a; }
+.class-tag.paladin { background: #ca8a3a; }
+.class-tag.deathknight { background: #3a5a6a; }
+.class-tag.mage { background: #3a6aca; }
+.class-tag.priest { background: #6a6a8a; }
+.class-tag.rogue { background: #5a5a5a; }
+.class-tag.shaman { background: #2a6a8a; }
+.class-tag.hunter { background: #3a7a3a; }
+.class-tag.warlock { background: #7a3a7a; }
+.class-tag.druid { background: #3a7a4a; }
+.class-tag.universal { background: #555; }
+
+.version-tag {
+    background: #444;
+}
+
+.type-tag {
+    background: #4a4a6a;
+}
+
+.copy-btn {
+    padding: 8px 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.copy-btn:active {
+    background: var(--accent-hover);
+}
+
+/* Screenshots */
+.config-screenshot, .macro-screenshot {
+    margin: 12px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #222;
+}
+
+.config-screenshot img, .macro-screenshot img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+}
+
+.config-warning {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid rgba(255, 68, 68, 0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #ff6666;
+    margin: 8px 0;
+}
+
+.config-warning i {
+    color: #ff4444;
+}
+
+.compatibility-info {
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(68, 255, 68, 0.05);
+    border: 1px solid rgba(68, 255, 68, 0.1);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #66ff66;
+    margin: 8px 0;
+}
+
+/* Macro Code */
+.macro-code {
+    position: relative;
+    background: #111;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.macro-code pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 13px;
+    color: #66ff66;
+    font-family: 'Courier New', monospace;
+}
+
+.macro-code .code-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.7);
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 14px;
+    gap: 8px;
+}
+
+.macro-code:active .code-overlay {
+    opacity: 1;
+}
+
+/* Admin */
+.admin-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    border-color: var(--accent);
+    background: rgba(204, 55, 0, 0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    padding: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    border-color: var(--accent);
+}
+
+.admin-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.submit-btn {
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submit-btn:active {
+    background: var(--accent-hover);
+}
+
+.admin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    margin: 12px 0;
+    background: rgba(255, 200, 0, 0.1);
+    border: 1px solid rgba(255, 200, 0, 0.3);
+    border-radius: var(--radius);
+    color: #ffcc00;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.admin-btn:active {
+    background: rgba(255, 200, 0, 0.2);
+}
+
+/* Close Button */
+.close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-color);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.close-btn:active {
+    background: rgba(255,255,255,0.1);
+}
+
+/* States */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.error-message {
+    text-align: center;
+    padding: 40px;
+    color: #ff4444;
+}
+
+.error-message i {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.addons-grid, .configs-list, .macros-list {
+    margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+    .menu-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .menu-card {
+        padding: 14px 8px;
+    }
+    
+    .menu-card i {
+        font-size: 1.8em;
+    }
+    
+    .menu-card span {
+        font-size: 12px;
+    }
+    
+    .menu-card small {
+        font-size: 10px;
+    }
+    
+    .quick-info {
+        flex-direction: column;
+    }
+}
