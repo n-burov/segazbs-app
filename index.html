@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SegaZBS Helper</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Дополнительные стили для админ-панели внутри index */
+        .admin-page-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .admin-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        .admin-page-header h1 {
+            font-size: 22px;
+        }
+
+        .admin-page-header h1 i {
+            color: #ffcc00;
+        }
+
+        .admin-close-header-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+
+        .admin-close-header-btn:active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .admin-tabs .tab-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 16px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            color: #888;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .admin-tabs .tab-btn.active {
+            background: rgba(204, 55, 0, 0.2);
+            border-color: #cc3700;
+            color: #fff;
+        }
+
+        .admin-tabs .tab-btn:active {
+            transform: scale(0.96);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .admin-form {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+            margin-bottom: 24px;
+        }
+
+        .admin-form h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #ffcc00;
+        }
+
+        .admin-form .form-group {
+            margin-bottom: 12px;
+        }
+
+        .admin-form label {
+            display: block;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .admin-form input,
+        .admin-form select,
+        .admin-form textarea {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .admin-form input:focus,
+        .admin-form select:focus,
+        .admin-form textarea:focus {
+            border-color: #cc3700;
+        }
+
+        .admin-form textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .admin-form .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #cc3700;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .admin-form .submit-btn:active {
+            background: #e04400;
+            transform: scale(0.98);
+        }
+
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .item-card .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-card .item-info .item-name {
+            font-weight: 600;
+            font-size: 15px;
+            word-break: break-word;
+        }
+
+        .item-card .item-info .item-meta {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .item-card .item-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+
+        .item-card .item-actions button {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .item-card .item-actions .edit-btn {
+            background: #0055cc;
+            color: #fff;
+        }
+
+        .item-card .item-actions .edit-btn:active {
+            background: #0066ee;
+        }
+
+        .item-card .item-actions .delete-btn {
+            background: #cc0033;
+            color: #fff;
+        }
+
+        .item-card .item-actions .delete-btn:active {
+            background: #ee0044;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #444;
+        }
+
+        /* Режим редактирования */
+        .item-card.editing {
+            border-color: #ffcc00;
+            background: #2a2a00;
+        }
+
+        .edit-form-inline {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .edit-form-inline input,
+        .edit-form-inline textarea {
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .edit-form-inline input:focus,
+        .edit-form-inline textarea:focus {
+            border-color: #ffcc00;
+        }
+
+        .edit-form-inline .edit-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-form-inline .edit-actions button {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .edit-form-inline .edit-actions .save-edit-btn {
+            background: #00aa44;
+            color: #fff;
+        }
+
+        .edit-form-inline .edit-actions .cancel-edit-btn {
+            background: #555;
+            color: #fff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- ========== ОСНОВНОЙ КОНТЕНТ ========== -->
+<!-- ============================================================ -->
+<div class="app-container" id="mainContent">
+
+    <header class="app-header">
+        <img src="https://i.postimg.cc/RFNNQ4RP/71a2c23b-f462-482a-8e89-f0c4336d3d98.jpg" alt="SegaZBS" class="avatar" id="logo">
+        <div class="header-content">
+            <h1>SegaZBS Helper</h1>
+            <p>База знаний для World of Warcraft</p>
+        </div>
+    </header>
+
+    <div class="user-id-display">
+        👤 ID: <span class="id-value" id="userIdText">загрузка...</span>
+        <span id="adminStatusText" style="margin-left:8px;"></span>
+    </div>
+
+    <div class="menu-grid">
+        <a href="addons.html" class="menu-card">
+            <i class="fas fa-puzzle-piece"></i>
+            <span>Аддоны</span>
+            <small>Список всех аддонов</small>
+        </a>
+        <a href="configs.html" class="menu-card">
+            <i class="fas fa-sliders-h"></i>
+            <span>Конфиги</span>
+            <small>Настройки для аддонов</small>
+        </a>
+        <a href="macros.html" class="menu-card">
+            <i class="fas fa-terminal"></i>
+            <span>Макросы</span>
+            <small>Готовые макросы</small>
+        </a>
+    </div>
+
+    <div class="quick-info">
+        <div class="info-badge">
+            <i class="fas fa-database"></i>
+            <span id="totalItems">Загрузка...</span>
+        </div>
+        <div class="info-badge">
+            <i class="fas fa-users"></i>
+            <span>@segazbs</span>
+        </div>
+    </div>
+
+    <button id="adminBtn" class="admin-btn" onclick="openAdmin()">
+        <i class="fas fa-crown"></i> Управление контентом <span class="lock-icon">🔐</span>
+    </button>
+
+    <div class="social-bar">
+        <a href="https://t.me/segazbs" target="_blank" class="telegram"><i class="fab fa-telegram"></i></a>
+        <a href="https://twitch.tv/segazbs" target="_blank" class="twitch"><i class="fab fa-twitch"></i></a>
+        <a href="https://youtube.com/segazbs" target="_blank" class="youtube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.gg/segazbs" target="_blank" class="discord"><i class="fab fa-discord"></i></a>
+    </div>
+
+    <button class="close-btn" onclick="closeApp()">
+        <i class="fas fa-chevron-left"></i> Закрыть
+    </button>
+</div>
+
+<!-- ============================================================ -->
+<!-- ========== АДМИН-ПАНЕЛЬ (встроенная) ========== -->
+<!-- ============================================================ -->
+<div id="adminPanel" style="display:none;">
+
+    <div class="admin-page-container">
+
+        <div class="admin-page-header">
+            <h1><i class="fas fa-crown"></i> Админ-панель</h1>
+            <button class="admin-close-header-btn" onclick="closeAdmin()">✕</button>
+        </div>
+
+        <!-- Вкладки -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="addons"><i class="fas fa-puzzle-piece"></i> Аддоны</button>
+            <button class="tab-btn" data-tab="configs"><i class="fas fa-sliders-h"></i> Конфиги</button>
+            <button class="tab-btn" data-tab="macros"><i class="fas fa-terminal"></i> Макросы</button>
+        </div>
+
+        <!-- ===== ВКЛАДКА: АДДОНЫ ===== -->
+        <div class="tab-content active" id="tab-addons">
+
+            <div class="admin-form">
+                <h3><i class="fas fa-plus-circle"></i> Добавить аддон</h3>
+                <form id="addonForm">
+                    <div class="form-group">
+                        <label>Название *</label>
+                        <input type="text" id="addonName" placeholder="WeakAuras" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ID (уникальный) *</label>
+                        <input type="text" id="addonId" placeholder="weakauras" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Категория</label>
+                        <select id="addonCategory">
+                            <option value="ui">UI</option>
+                            <option value="combat">Бой</option>
+                            <option value="professions">Профессии</option>
+                            <option value="pvp">PvP</option>
+                            <option value="utility">Утилиты</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Версия</label>
+                        <input type="text" id="addonVersion" placeholder="5.0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea id="addonDescription" placeholder="Краткое описание аддона"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>URL скриншота</label>
+                        <input type="text" id="addonScreenshot" placeholder="https://i.postimg.cc/xxx/image.jpg">
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> Добавить аддон</button>
+                </form>
+            </div>
+
+            <h3 style="margin-bottom:12px;">Существующие аддоны</h3>
+            <div class="items-list" id="addonsList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Загрузка...</div>
+            </div>
+        </div>
+
+        <!-- ===== ВКЛАДКА: КОНФИГИ ===== -->
+        <div class="tab-content" id="tab-configs">
+
+            <div class="admin-form">
+                <h3><i class="fas fa-plus-circle"></i> Добавить конфиг</h3>
+                <form id="configForm">
+                    <div class="form-group">
+                        <label>Название *</label>
+                        <input type="text" id="configName" placeholder="WeakAuras для воина" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ID (уникальный) *</label>
+                        <input type="text" id="configId" placeholder="wa-fury-warrior" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Аддон *</label>
+                        <select id="configAddon" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Класс</label>
+                        <select id="configClass">
+                            <option value="universal">Универсальный</option>
+                            <option value="warrior">Воин</option>
+                            <option value="paladin">Паладин</option>
+                            <option value="deathknight">Рыцарь смерти</option>
+                            <option value="mage">Маг</option>
+                            <option value="priest">Жрец</option>
+                            <option value="rogue">Разбойник</option>
+                            <option value="shaman">Шаман</option>
+                            <option value="hunter">Охотник</option>
+                            <option value="warlock">Чернокнижник</option>
+                            <option value="druid">Друид</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Версия аддона</label>
+                        <input type="text" id="configVersion" placeholder="5.0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea id="configDescription" placeholder="Описание конфига"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Содержимое *</label>
+                        <textarea id="configContent" placeholder="!WA:2!..." rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>URL скриншота</label>
+                        <input type="text" id="configScreenshot" placeholder="https://i.postimg.cc/xxx/image.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label>Предупреждение</label>
+                        <input type="text" id="configWarning" placeholder="Требуется WeakAuras 5.0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Совместимость</label>
+                        <input type="text" id="configCompatibility" placeholder="WoW 3.3.5 / 4.3.4">
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> Добавить конфиг</button>
+                </form>
+            </div>
+
+            <h3 style="margin-bottom:12px;">Существующие конфиги</h3>
+            <div class="items-list" id="configsList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Загрузка...</div>
+            </div>
+        </div>
+
+        <!-- ===== ВКЛАДКА: МАКРОСЫ ===== -->
+        <div class="tab-content" id="tab-macros">
+
+            <div class="admin-form">
+                <h3><i class="fas fa-plus-circle"></i> Добавить макрос</h3>
+                <form id="macroForm">
+                    <div class="form-group">
+                        <label>Название *</label>
+                        <input type="text" id="macroName" placeholder="Заряд + Смертельный удар" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ID (уникальный) *</label>
+                        <input type="text" id="macroId" placeholder="warrior-charge" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Класс</label>
+                        <select id="macroClass">
+                            <option value="universal">Универсальный</option>
+                            <option value="warrior">Воин</option>
+                            <option value="paladin">Паладин</option>
+                            <option value="deathknight">Рыцарь смерти</option>
+                            <option value="mage">Маг</option>
+                            <option value="priest">Жрец</option>
+                            <option value="rogue">Разбойник</option>
+                            <option value="shaman">Шаман</option>
+                            <option value="hunter">Охотник</option>
+                            <option value="warlock">Чернокнижник</option>
+                            <option value="druid">Друид</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Тип</label>
+                        <input type="text" id="macroType" placeholder="PvP, PvE, Утилита">
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea id="macroDescription" placeholder="Описание макроса"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Текст макроса *</label>
+                        <textarea id="macroContent" placeholder="#showtooltip Заряд\n/cast Заряд\n/cast Смертельный удар" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>URL скриншота</label>
+                        <input type="text" id="macroScreenshot" placeholder="https://i.postimg.cc/xxx/image.jpg">
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> Добавить макрос</button>
+                </form>
+            </div>
+
+            <h3 style="margin-bottom:12px;">Существующие макросы</h3>
+            <div class="items-list" id="macrosList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Загрузка...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ========== СКРИПТЫ ========== -->
+<!-- ============================================================ -->
+<script>
+    // ============================================
+    // ИНИЦИАЛИЗАЦИЯ TELEGRAM
+    // ============================================
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // ============================================
+    // ID АДМИНИСТРАТОРОВ
+    // ============================================
+    const ADMIN_IDS = [984825922];
+
+    // ============================================
+    // ПОЛУЧЕНИЕ ID
+    // ============================================
+    let userId = null;
+
+    try {
+        userId = tg.initDataUnsafe?.user?.id || null;
+        if (!userId) {
+            const saved = localStorage.getItem('adminUserId');
+            if (saved) userId = parseInt(saved);
+        }
+    } catch (e) {
+        console.warn('Ошибка получения ID:', e);
+    }
+
+    // ============================================
+    // ФУНКЦИИ ПРОВЕРКИ
+    // ============================================
+    function isAdmin() {
+        if (!userId) return false;
+        return ADMIN_IDS.includes(userId);
+    }
+
+    function displayUserId() {
+        const el = document.getElementById('userIdText');
+        const statusEl = document.getElementById('adminStatusText');
+        if (!el) return;
+
+        if (userId) {
+            el.textContent = userId;
+            el.className = 'id-value' + (isAdmin() ? ' admin' : ' user');
+            statusEl.textContent = isAdmin() ? '✅ Админ' : '👤 Пользователь';
+            statusEl.style.color = isAdmin() ? '#66ff66' : '#ffcc00';
+        } else {
+            el.textContent = 'не определён';
+            el.className = 'id-value unknown';
+            statusEl.textContent = '⚠️';
+            statusEl.style.color = '#ff4444';
+        }
+    }
+
+    function showAdminButton() {
+        const btn = document.getElementById('adminBtn');
+        if (!btn) return;
+        btn.style.display = isAdmin() ? 'flex' : 'none';
+    }
+
+    // ============================================
+    // ОТКРЫТЬ / ЗАКРЫТЬ АДМИНКУ
+    // ============================================
+    function openAdmin() {
+        if (!isAdmin()) {
+            tg.showPopup({
+                title: '⛔ Доступ запрещён',
+                message: `Ваш ID: ${userId || 'не определён'}`,
+                buttons: [{ type: 'ok' }]
+            });
+            return;
+        }
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        refreshLists();
+    }
+
+    function closeAdmin() {
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    // ============================================
+    // ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+    // ============================================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ============================================
+    // ЗАГРУЗКА АДДОНОВ ДЛЯ СЕЛЕКТА
+    // ============================================
+    async function loadAddonsForSelect() {
+        try {
+            const res = await fetch('data/addons.json');
+            const addons = await res.json();
+            const select = document.getElementById('configAddon');
+            select.innerHTML = '<option value="">Выберите аддон</option>';
+            addons.forEach(addon => {
+                const option = document.createElement('option');
+                option.value = addon.id;
+                option.textContent = addon.name;
+                select.appendChild(option);
+            });
+        } catch (e) {
+            console.error('Ошибка загрузки аддонов:', e);
+        }
+    }
+
+    // ============================================
+    // ЗАГРУЗКА СПИСКОВ
+    // ============================================
+    async function loadAddonsList() {
+        try {
+            const res = await fetch('data/addons.json');
+            const addons = await res.json();
+            const container = document.getElementById('addonsList');
+            if (addons.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i> Нет аддонов</div>`;
+                return;
+            }
+            container.innerHTML = addons.map(addon => `
+                <div class="item-card" data-type="addons" data-id="${addon.id}">
+                    <div class="item-info">
+                        <div class="item-name">${addon.name}</div>
+                        <div class="item-meta">${addon.category || 'Без категории'} ${addon.version ? '• v' + addon.version : ''}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="editItem('addons', '${addon.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="delete-btn" onclick="deleteItem('addons', '${addon.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            document.getElementById('addonsList').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки</div>`;
+        }
+    }
+
+    async function loadConfigsList() {
+        try {
+            const res = await fetch('data/configs.json');
+            const configs = await res.json();
+            const container = document.getElementById('configsList');
+            if (configs.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i> Нет конфигов</div>`;
+                return;
+            }
+            container.innerHTML = configs.map(config => `
+                <div class="item-card" data-type="configs" data-id="${config.id}">
+                    <div class="item-info">
+                        <div class="item-name">${config.name}</div>
+                        <div class="item-meta">${config.addonName || 'Без аддона'} ${config.class ? '• ' + config.class : ''}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="editItem('configs', '${config.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="delete-btn" onclick="deleteItem('configs', '${config.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            document.getElementById('configsList').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки</div>`;
+        }
+    }
+
+    async function loadMacrosList() {
+        try {
+            const res = await fetch('data/macros.json');
+            const macros = await res.json();
+            const container = document.getElementById('macrosList');
+            if (macros.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i> Нет макросов</div>`;
+                return;
+            }
+            container.innerHTML = macros.map(macro => `
+                <div class="item-card" data-type="macros" data-id="${macro.id}">
+                    <div class="item-info">
+                        <div class="item-name">${macro.name}</div>
+                        <div class="item-meta">${macro.class || 'Универсальный'} ${macro.type ? '• ' + macro.type : ''}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="editItem('macros', '${macro.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="delete-btn" onclick="deleteItem('macros', '${macro.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            document.getElementById('macrosList').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки</div>`;
+        }
+    }
+
+    // ============================================
+    // РЕДАКТИРОВАНИЕ (inline)
+    // ============================================
+    function editItem(type, id) {
+        // Показываем форму редактирования
+        alert(`✏️ Редактирование ${type}: ${id}\n\nФункция в разработке. Пока можно удалить и создать заново.`);
+        // Здесь можно реализовать inline-редактирование
+    }
+
+    // ============================================
+    // УДАЛЕНИЕ
+    // ============================================
+    async function deleteItem(type, id) {
+        const names = { addons: 'аддон', configs: 'конфиг', macros: 'макрос' };
+        if (!confirm(`Удалить ${names[type] || 'элемент'} "${id}"?`)) return;
+
+        try {
+            const res = await fetch(`data/${type}.json`);
+            let data = await res.json();
+            const filtered = data.filter(item => item.id !== id);
+
+            if (filtered.length === data.length) {
+                alert('❌ Элемент не найден');
+                return;
+            }
+
+            await saveData(type, filtered);
+            alert('✅ Удалено!');
+            refreshLists();
+        } catch (e) {
+            alert('❌ Ошибка удаления: ' + e.message);
+        }
+    }
+
+    // ============================================
+    // СОХРАНЕНИЕ (локальное — для демонстрации)
+    // ============================================
+    async function saveData(type, data) {
+        // Временное решение: сохраняем в localStorage
+        localStorage.setItem(`admin_${type}`, JSON.stringify(data));
+        console.log(`💾 Сохранено ${type}:`, data);
+        // Для реального сохранения нужен GitHub токен
+        // Пока просто имитация
+        return true;
+    }
+
+    // ============================================
+    // ОБНОВЛЕНИЕ СПИСКОВ
+    // ============================================
+    function refreshLists() {
+        loadAddonsList();
+        loadConfigsList();
+        loadMacrosList();
+        loadAddonsForSelect();
+    }
+
+    // ============================================
+    // ОБРАБОТЧИКИ ФОРМ
+    // ============================================
+
+    // Аддоны
+    document.getElementById('addonForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            id: document.getElementById('addonId').value.trim(),
+            name: document.getElementById('addonName').value.trim(),
+            category: document.getElementById('addonCategory').value,
+            version: document.getElementById('addonVersion').value.trim(),
+            description: document.getElementById('addonDescription').value.trim(),
+            screenshot: document.getElementById('addonScreenshot').value.trim()
+        };
+        if (!data.id || !data.name) { alert('Заполните название и ID'); return; }
+
+        try {
+            const res = await fetch('data/addons.json');
+            const addons = await res.json();
+            if (addons.find(a => a.id === data.id)) { alert('ID уже существует'); return; }
+            addons.push(data);
+            await saveData('addons', addons);
+            document.getElementById('addonForm').reset();
+            alert('✅ Аддон добавлен!');
+            refreshLists();
+        } catch (e) { alert('❌ Ошибка: ' + e.message); }
+    });
+
+    // Конфиги
+    document.getElementById('configForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            id: document.getElementById('configId').value.trim(),
+            name: document.getElementById('configName').value.trim(),
+            addonId: document.getElementById('configAddon').value,
+            class: document.getElementById('configClass').value,
+            version: document.getElementById('configVersion').value.trim(),
+            description: document.getElementById('configDescription').value.trim(),
+            content: document.getElementById('configContent').value.trim(),
+            screenshot: document.getElementById('configScreenshot').value.trim(),
+            warning: document.getElementById('configWarning').value.trim(),
+            compatibility: document.getElementById('configCompatibility').value.trim()
+        };
+        if (!data.id || !data.name || !data.addonId || !data.content) {
+            alert('Заполните обязательные поля');
+            return;
+        }
+
+        try {
+            const res = await fetch('data/configs.json');
+            const configs = await res.json();
+            if (configs.find(c => c.id === data.id)) { alert('ID уже существует'); return; }
+            configs.push(data);
+            await saveData('configs', configs);
+            document.getElementById('configForm').reset();
+            alert('✅ Конфиг добавлен!');
+            refreshLists();
+        } catch (e) { alert('❌ Ошибка: ' + e.message); }
+    });
+
+    // Макросы
+    document.getElementById('macroForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            id: document.getElementById('macroId').value.trim(),
+            name: document.getElementById('macroName').value.trim(),
+            class: document.getElementById('macroClass').value,
+            type: document.getElementById('macroType').value.trim(),
+            description: document.getElementById('macroDescription').value.trim(),
+            content: document.getElementById('macroContent').value.trim(),
+            screenshot: document.getElementById('macroScreenshot').value.trim()
+        };
+        if (!data.id || !data.name || !data.content) {
+            alert('Заполните обязательные поля');
+            return;
+        }
+
+        try {
+            const res = await fetch('data/macros.json');
+            const macros = await res.json();
+            if (macros.find(m => m.id === data.id)) { alert('ID уже существует'); return; }
+            macros.push(data);
+            await saveData('macros', macros);
+            document.getElementById('macroForm').reset();
+            alert('✅ Макрос добавлен!');
+            refreshLists();
+        } catch (e) { alert('❌ Ошибка: ' + e.message); }
+    });
+
+    // ============================================
+    // 5 ТАПОВ ПО АВАТАРКЕ
+    // ============================================
+    let tapCount = 0;
+    let tapTimer = null;
+
+    document.getElementById('logo')?.addEventListener('click', () => {
+        tapCount++;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
+
+        if (tapCount >= 5) {
+            tapCount = 0;
+            if (isAdmin()) {
+                openAdmin();
+            } else {
+                tg.showPopup({
+                    title: '⛔ Доступ запрещён',
+                    message: `Только администраторы могут войти в панель управления.\nВаш ID: ${userId || 'не определён'}`,
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+        }
+    });
+
+    // ============================================
+    // ЗАПРОС ID ЕСЛИ НЕ ОПРЕДЕЛЁН
+    // ============================================
+    if (!userId) {
+        setTimeout(() => {
+            tg.showPopup({
+                title: '🔐 Вход в приложение',
+                message: 'Введите ваш Telegram ID для доступа к админ-панели.\n\nID можно узнать у @userinfobot',
+                buttons: [
+                    { id: 'cancel', type: 'cancel', text: 'Пропустить' },
+                    { id: 'enter', type: 'default', text: '📝 Ввести ID' }
+                ]
+            }, (btnId) => {
+                if (btnId === 'enter') {
+                    const input = prompt('Введите ваш Telegram ID (число):');
+                    if (input && !isNaN(input) && input.trim() !== '') {
+                        const parsed = parseInt(input.trim());
+                        localStorage.setItem('adminUserId', parsed);
+                        location.reload();
+                    }
+                }
+            });
+        }, 800);
+    }
+
+    // ============================================
+    // ЗАГРУЗКА СТАТИСТИКИ НА ГЛАВНОЙ
+    // ============================================
+    async function loadStats() {
+        try {
+            const [addons, configs, macros] = await Promise.all([
+                fetch('data/addons.json').then(r => r.json()),
+                fetch('data/configs.json').then(r => r.json()),
+                fetch('data/macros.json').then(r => r.json())
+            ]);
+            const total = addons.length + configs.length + macros.length;
+            document.getElementById('totalItems').textContent = `${total} элементов`;
+        } catch {
+            document.getElementById('totalItems').textContent = 'Данные загружены';
+        }
+    }
+
+    // ============================================
+    // ЗАКРЫТЬ ПРИЛОЖЕНИЕ
+    // ============================================
+    function closeApp() {
+        tg.close();
+    }
+
+    // ============================================
+    // ИНИЦИАЛИЗАЦИЯ
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        displayUserId();
+        showAdminButton();
+        loadStats();
+        loadAddonsForSelect();
+    });
+
+    // Экспорт в глобальный скоуп
+    window.openAdmin = openAdmin;
+    window.closeAdmin = closeAdmin;
+    window.editItem = editItem;
+    window.deleteItem = deleteItem;
+    window.closeApp = closeApp;
+</script>
+
+</body>
+</html>
