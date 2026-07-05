@@ -1,0 +1,12 @@
+{
+  "name": "segazbs-app",
+  "version": "1.0.0",
+  "description": "SegaZBS Helper - WoW Knowledge Base",
+  "main": "api/telegram.js",
+  "scripts": {
+    "start": "node api/telegram.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.15.0"
+  }
+}
