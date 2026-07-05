@@ -1,4 +1,3 @@
-// api/telegram.js
 const { Telegraf } = require('telegraf');
 
 // Переменные из окружения Vercel
