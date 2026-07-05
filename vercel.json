@@ -9,10 +9,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "BOT_TOKEN": "@bot_token",
-    "CHANNEL_ID": "@channel_id",
-    "WEBAPP_URL": "@webapp_url"
-  }
+  ]
 }
