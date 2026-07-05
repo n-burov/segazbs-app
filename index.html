@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Дополнительные стили для админ-панели внутри index */
+        /* Дополнительные стили */
         .admin-page-container {
             max-width: 600px;
             margin: 0 auto;
@@ -139,6 +139,28 @@
             font-family: 'Courier New', monospace;
         }
 
+        .admin-form .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+
+        .admin-form .checkbox-group input[type="checkbox"] {
+            width: auto;
+            width: 18px;
+            height: 18px;
+            accent-color: #cc3700;
+            cursor: pointer;
+        }
+
+        .admin-form .checkbox-group label {
+            display: inline;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
         .admin-form .submit-btn {
             width: 100%;
             padding: 14px;
@@ -155,6 +177,11 @@
         .admin-form .submit-btn:active {
             background: #e04400;
             transform: scale(0.98);
+        }
+
+        .admin-form .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .items-list {
@@ -237,56 +264,36 @@
             color: #444;
         }
 
-        /* Режим редактирования */
-        .item-card.editing {
-            border-color: #ffcc00;
-            background: #2a2a00;
-        }
-
-        .edit-form-inline {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .edit-form-inline input,
-        .edit-form-inline textarea {
-            padding: 8px 12px;
-            background: #1a1a1a;
-            border: 1px solid #3a3a3a;
-            border-radius: 6px;
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 10px;
             color: #fff;
-            font-size: 13px;
-            outline: none;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideUp 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
         }
 
-        .edit-form-inline input:focus,
-        .edit-form-inline textarea:focus {
-            border-color: #ffcc00;
-        }
-
-        .edit-form-inline .edit-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .edit-form-inline .edit-actions button {
-            padding: 6px 16px;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .edit-form-inline .edit-actions .save-edit-btn {
+        .toast.success {
             background: #00aa44;
-            color: #fff;
         }
 
-        .edit-form-inline .edit-actions .cancel-edit-btn {
-            background: #555;
-            color: #fff;
+        .toast.error {
+            background: #cc0033;
+        }
+
+        .toast.info {
+            background: #0055cc;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
         @keyframes fadeIn {
@@ -361,7 +368,7 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- ========== АДМИН-ПАНЕЛЬ (встроенная) ========== -->
+<!-- ========== АДМИН-ПАНЕЛЬ ========== -->
 <!-- ============================================================ -->
 <div id="adminPanel" style="display:none;">
 
@@ -414,6 +421,11 @@
                     <div class="form-group">
                         <label>URL скриншота</label>
                         <input type="text" id="addonScreenshot" placeholder="https://i.postimg.cc/xxx/image.jpg">
+                    </div>
+                    <!-- 👇 ЧЕКБОКС ОТПРАВКИ В КАНАЛ -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="addonNotify" checked>
+                        <label for="addonNotify">📢 Отправить пост в канал о новом аддоне</label>
                     </div>
                     <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> Добавить аддон</button>
                 </form>
@@ -483,6 +495,11 @@
                         <label>Совместимость</label>
                         <input type="text" id="configCompatibility" placeholder="WoW 3.3.5 / 4.3.4">
                     </div>
+                    <!-- 👇 ЧЕКБОКС ОТПРАВКИ В КАНАЛ -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="configNotify" checked>
+                        <label for="configNotify">📢 Отправить пост в канал о новом конфиге</label>
+                    </div>
                     <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> Добавить конфиг</button>
                 </form>
             </div>
@@ -538,6 +555,11 @@
                     <div class="form-group">
                         <label>URL скриншота</label>
                         <input type="text" id="macroScreenshot" placeholder="https://i.postimg.cc/xxx/image.jpg">
+                    </div>
+                    <!-- 👇 ЧЕКБОКС ОТПРАВКИ В КАНАЛ -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="macroNotify" checked>
+                        <label for="macroNotify">📢 Отправить пост в канал о новом макросе</label>
                     </div>
                     <button type="submit" class="submit-btn"><i class="fas fa-plus"></i> Добавить макрос</button>
                 </form>
@@ -612,6 +634,48 @@
         const btn = document.getElementById('adminBtn');
         if (!btn) return;
         btn.style.display = isAdmin() ? 'flex' : 'none';
+    }
+
+    // ============================================
+    // TOAST-УВЕДОМЛЕНИЯ
+    // ============================================
+    function showToast(message, type = 'success') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // ============================================
+    // ОТПРАВКА В КАНАЛ ЧЕРЕЗ API
+    // ============================================
+    async function notifyChannel(type, data) {
+        try {
+            const response = await fetch('/api/sendPost', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, data })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showToast('📢 Пост отправлен в канал!', 'success');
+            } else {
+                showToast('⚠️ Не удалось отправить пост: ' + (result.error || 'неизвестная ошибка'), 'error');
+            }
+            return result;
+        } catch (error) {
+            showToast('❌ Ошибка отправки в канал: ' + error.message, 'error');
+            return { success: false, error: error.message };
+        }
     }
 
     // ============================================
@@ -750,16 +814,14 @@
     }
 
     // ============================================
-    // РЕДАКТИРОВАНИЕ (inline)
+    // РЕДАКТИРОВАНИЕ
     // ============================================
     function editItem(type, id) {
-        // Показываем форму редактирования
-        alert(`✏️ Редактирование ${type}: ${id}\n\nФункция в разработке. Пока можно удалить и создать заново.`);
-        // Здесь можно реализовать inline-редактирование
+        showToast(`✏️ Редактирование ${type}: ${id} — функция в разработке`, 'info');
     }
 
     // ============================================
-    // УДАЛЕНИЕ
+    // УДАЛЕНИЕ С ОТПРАВКОЙ В КАНАЛ
     // ============================================
     async function deleteItem(type, id) {
         const names = { addons: 'аддон', configs: 'конфиг', macros: 'макрос' };
@@ -768,30 +830,42 @@
         try {
             const res = await fetch(`data/${type}.json`);
             let data = await res.json();
+            const itemToDelete = data.find(item => item.id === id);
             const filtered = data.filter(item => item.id !== id);
 
             if (filtered.length === data.length) {
-                alert('❌ Элемент не найден');
+                showToast('❌ Элемент не найден', 'error');
                 return;
             }
 
             await saveData(type, filtered);
-            alert('✅ Удалено!');
+
+            // Спрашиваем, отправить ли пост об удалении
+            const sendDelete = confirm(`📢 Отправить пост в канал об удалении "${itemToDelete.name}"?`);
+            if (sendDelete) {
+                const deleteData = {
+                    name: itemToDelete.name,
+                    description: `Удалён ${names[type]}: ${itemToDelete.name}`,
+                    class: itemToDelete.class || null,
+                    addonName: itemToDelete.addonName || null,
+                    version: itemToDelete.version || null
+                };
+                await notifyChannel(type, deleteData);
+            }
+
+            showToast('✅ Удалено!', 'success');
             refreshLists();
         } catch (e) {
-            alert('❌ Ошибка удаления: ' + e.message);
+            showToast('❌ Ошибка удаления: ' + e.message, 'error');
         }
     }
 
     // ============================================
-    // СОХРАНЕНИЕ (локальное — для демонстрации)
+    // СОХРАНЕНИЕ (локальное)
     // ============================================
     async function saveData(type, data) {
-        // Временное решение: сохраняем в localStorage
         localStorage.setItem(`admin_${type}`, JSON.stringify(data));
         console.log(`💾 Сохранено ${type}:`, data);
-        // Для реального сохранения нужен GitHub токен
-        // Пока просто имитация
         return true;
     }
 
@@ -806,12 +880,16 @@
     }
 
     // ============================================
-    // ОБРАБОТЧИКИ ФОРМ
+    // ОБРАБОТЧИКИ ФОРМ С ОТПРАВКОЙ В КАНАЛ
     // ============================================
 
     // Аддоны
     document.getElementById('addonForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const btn = e.target.querySelector('.submit-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Сохранение...';
+
         const data = {
             id: document.getElementById('addonId').value.trim(),
             name: document.getElementById('addonName').value.trim(),
@@ -820,27 +898,63 @@
             description: document.getElementById('addonDescription').value.trim(),
             screenshot: document.getElementById('addonScreenshot').value.trim()
         };
-        if (!data.id || !data.name) { alert('Заполните название и ID'); return; }
+        if (!data.id || !data.name) {
+            showToast('❌ Заполните название и ID', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus"></i> Добавить аддон';
+            return;
+        }
 
         try {
             const res = await fetch('data/addons.json');
             const addons = await res.json();
-            if (addons.find(a => a.id === data.id)) { alert('ID уже существует'); return; }
+            if (addons.find(a => a.id === data.id)) {
+                showToast('❌ ID уже существует', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus"></i> Добавить аддон';
+                return;
+            }
             addons.push(data);
             await saveData('addons', addons);
             document.getElementById('addonForm').reset();
-            alert('✅ Аддон добавлен!');
+
+            // Отправка в канал, если чекбокс включён
+            const notify = document.getElementById('addonNotify').checked;
+            if (notify) {
+                await notifyChannel('addon', data);
+            }
+
+            showToast('✅ Аддон добавлен!', 'success');
             refreshLists();
-        } catch (e) { alert('❌ Ошибка: ' + e.message); }
+        } catch (e) {
+            showToast('❌ Ошибка: ' + e.message, 'error');
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus"></i> Добавить аддон';
     });
 
     // Конфиги
     document.getElementById('configForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const btn = e.target.querySelector('.submit-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Сохранение...';
+
+        // Получаем название аддона для красивого поста
+        let addonName = '';
+        try {
+            const addonRes = await fetch('data/addons.json');
+            const addons = await addonRes.json();
+            const addonId = document.getElementById('configAddon').value;
+            const found = addons.find(a => a.id === addonId);
+            if (found) addonName = found.name;
+        } catch (e) {}
+
         const data = {
             id: document.getElementById('configId').value.trim(),
             name: document.getElementById('configName').value.trim(),
             addonId: document.getElementById('configAddon').value,
+            addonName: addonName,
             class: document.getElementById('configClass').value,
             version: document.getElementById('configVersion').value.trim(),
             description: document.getElementById('configDescription').value.trim(),
@@ -850,25 +964,46 @@
             compatibility: document.getElementById('configCompatibility').value.trim()
         };
         if (!data.id || !data.name || !data.addonId || !data.content) {
-            alert('Заполните обязательные поля');
+            showToast('❌ Заполните обязательные поля', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus"></i> Добавить конфиг';
             return;
         }
 
         try {
             const res = await fetch('data/configs.json');
             const configs = await res.json();
-            if (configs.find(c => c.id === data.id)) { alert('ID уже существует'); return; }
+            if (configs.find(c => c.id === data.id)) {
+                showToast('❌ ID уже существует', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus"></i> Добавить конфиг';
+                return;
+            }
             configs.push(data);
             await saveData('configs', configs);
             document.getElementById('configForm').reset();
-            alert('✅ Конфиг добавлен!');
+
+            const notify = document.getElementById('configNotify').checked;
+            if (notify) {
+                await notifyChannel('config', data);
+            }
+
+            showToast('✅ Конфиг добавлен!', 'success');
             refreshLists();
-        } catch (e) { alert('❌ Ошибка: ' + e.message); }
+        } catch (e) {
+            showToast('❌ Ошибка: ' + e.message, 'error');
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus"></i> Добавить конфиг';
     });
 
     // Макросы
     document.getElementById('macroForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const btn = e.target.querySelector('.submit-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Сохранение...';
+
         const data = {
             id: document.getElementById('macroId').value.trim(),
             name: document.getElementById('macroName').value.trim(),
@@ -879,20 +1014,37 @@
             screenshot: document.getElementById('macroScreenshot').value.trim()
         };
         if (!data.id || !data.name || !data.content) {
-            alert('Заполните обязательные поля');
+            showToast('❌ Заполните обязательные поля', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus"></i> Добавить макрос';
             return;
         }
 
         try {
             const res = await fetch('data/macros.json');
             const macros = await res.json();
-            if (macros.find(m => m.id === data.id)) { alert('ID уже существует'); return; }
+            if (macros.find(m => m.id === data.id)) {
+                showToast('❌ ID уже существует', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus"></i> Добавить макрос';
+                return;
+            }
             macros.push(data);
             await saveData('macros', macros);
             document.getElementById('macroForm').reset();
-            alert('✅ Макрос добавлен!');
+
+            const notify = document.getElementById('macroNotify').checked;
+            if (notify) {
+                await notifyChannel('macro', data);
+            }
+
+            showToast('✅ Макрос добавлен!', 'success');
             refreshLists();
-        } catch (e) { alert('❌ Ошибка: ' + e.message); }
+        } catch (e) {
+            showToast('❌ Ошибка: ' + e.message, 'error');
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus"></i> Добавить макрос';
     });
 
     // ============================================
@@ -985,6 +1137,7 @@
     window.editItem = editItem;
     window.deleteItem = deleteItem;
     window.closeApp = closeApp;
+    window.notifyChannel = notifyChannel;
 </script>
 
 </body>
